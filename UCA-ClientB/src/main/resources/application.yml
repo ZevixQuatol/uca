@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: uca-client-b
+
+server:
+  port: ${UCA_CLIENT_B_PORT:20102}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+uca:
+  client:
+    application-code: client-b
+    application-name: 子业务系统 B
+    instance-id: ${UCA_CLIENT_B_INSTANCE_ID:client-b-1}
+    version: 0.0.1
+    advertised-base-url: ${UCA_CLIENT_B_ADVERTISED_BASE_URL:http://127.0.0.1:20102}
+    base-registry-url: ${UCA_BASE_URL:http://127.0.0.1:20000}
+    heartbeat-interval: ${UCA_CLIENT_B_HEARTBEAT_INTERVAL:10s}
+    api-prefix: /api/v1/client-b
+    call-peer-path: /call-a
+    target-application-code: client-a
+    target-ping-path: /api/v1/client-a/demo/ping

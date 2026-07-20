@@ -1,0 +1,48 @@
+@host = http://localhost:48080
+
+### UCA-Base 系统状态页面
+GET {{host}}/
+
+### UCA-Base 自身健康状态
+GET {{host}}/actuator/health
+
+### 注册 Auth 实例 1
+PUT {{host}}/api/v1/applications/auth/instances/auth-1
+Content-Type: application/json
+
+{
+  "applicationName": "认证模块",
+  "baseUrl": "http://auth-1:8080",
+  "version": "1.0.0",
+  "metadata": {
+    "zone": "default"
+  }
+}
+
+### 注册 Auth 实例 2
+PUT {{host}}/api/v1/applications/auth/instances/auth-2
+Content-Type: application/json
+
+{
+  "applicationName": "认证模块",
+  "baseUrl": "http://auth-2:8080",
+  "version": "1.0.0",
+  "metadata": {
+    "zone": "default"
+  }
+}
+
+### Auth 实例 1 心跳
+PUT {{host}}/api/v1/applications/auth/instances/auth-1/heartbeat
+
+### 轮询发现，连续执行会在在线实例之间切换
+GET {{host}}/api/v1/applications/auth/instances/next
+
+### 查询全部应用状态
+GET {{host}}/api/v1/applications
+
+### 查询 Auth 状态
+GET {{host}}/api/v1/applications/auth
+
+### 主动注销 Auth 实例 1
+DELETE {{host}}/api/v1/applications/auth/instances/auth-1

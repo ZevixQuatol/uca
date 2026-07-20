@@ -1,0 +1,10 @@
+@host = http://127.0.0.1:48102
+
+### ClientB 健康检查
+GET {{host}}/actuator/health
+
+### ClientB Ping
+GET {{host}}/api/v1/client-b/demo/ping
+
+### ClientB 通过 UCA-Base 发现并调用 ClientA
+GET {{host}}/api/v1/client-b/demo/call-a
