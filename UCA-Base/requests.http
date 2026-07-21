@@ -1,4 +1,4 @@
-@host = http://localhost:48080
+@host = http://localhost:20000
 
 ### UCA-Base 系统状态页面
 GET {{host}}/
@@ -7,7 +7,7 @@ GET {{host}}/
 GET {{host}}/actuator/health
 
 ### 注册 Auth 实例 1
-PUT {{host}}/api/v1/applications/auth/instances/auth-1
+POST {{host}}/api/v1/applications/auth/instances
 Content-Type: application/json
 
 {
@@ -18,9 +18,10 @@ Content-Type: application/json
     "zone": "default"
   }
 }
+> {% client.global.set("authInstance1", response.body.instanceId); %}
 
 ### 注册 Auth 实例 2
-PUT {{host}}/api/v1/applications/auth/instances/auth-2
+POST {{host}}/api/v1/applications/auth/instances
 Content-Type: application/json
 
 {
@@ -31,9 +32,10 @@ Content-Type: application/json
     "zone": "default"
   }
 }
+> {% client.global.set("authInstance2", response.body.instanceId); %}
 
 ### Auth 实例 1 心跳
-PUT {{host}}/api/v1/applications/auth/instances/auth-1/heartbeat
+PUT {{host}}/api/v1/applications/auth/instances/{{authInstance1}}/heartbeat
 
 ### 轮询发现，连续执行会在在线实例之间切换
 GET {{host}}/api/v1/applications/auth/instances/next
@@ -45,4 +47,4 @@ GET {{host}}/api/v1/applications
 GET {{host}}/api/v1/applications/auth
 
 ### 主动注销 Auth 实例 1
-DELETE {{host}}/api/v1/applications/auth/instances/auth-1
+DELETE {{host}}/api/v1/applications/auth/instances/{{authInstance1}}

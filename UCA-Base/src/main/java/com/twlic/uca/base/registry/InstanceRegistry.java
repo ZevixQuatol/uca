@@ -10,9 +10,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.springframework.stereotype.Component;
-
-@Component
 public class InstanceRegistry {
 
     private static final Comparator<RegisteredInstance> INSTANCE_ORDER =

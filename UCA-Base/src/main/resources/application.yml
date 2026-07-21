@@ -12,7 +12,8 @@ management:
         include: health,info
 
 uca:
-  registry:
+  base:
     heartbeat-timeout: ${UCA_REGISTRY_HEARTBEAT_TIMEOUT:30s}
     offline-retention: ${UCA_REGISTRY_OFFLINE_RETENTION:2m}
     scan-interval: ${UCA_REGISTRY_SCAN_INTERVAL:5s}
+    secret-interval: ${UCA_BASE_SECRET_INTERVAL:10m}

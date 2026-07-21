@@ -3,9 +3,7 @@ package com.twlic.uca.base.lifecycle;
 import com.twlic.uca.base.config.RegistryProperties;
 import com.twlic.uca.base.registry.InstanceRegistry;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-@Component
 public class InstanceLifecycleScheduler {
 
     private final InstanceRegistry registry;
@@ -16,7 +14,7 @@ public class InstanceLifecycleScheduler {
         this.properties = properties;
     }
 
-    @Scheduled(fixedDelayString = "#{@registryProperties.scanInterval.toMillis()}")
+    @Scheduled(fixedDelayString = "${uca.base.scan-interval:5s}")
     public void refreshStatuses() {
         registry.updateLifecycle(
                 properties.getHeartbeatTimeout(),

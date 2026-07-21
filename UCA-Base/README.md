@@ -2,7 +2,7 @@
 
 `UCA-Base` 是统一控制面下可组合业务应用架构的基础模块。第一阶段负责子业务系统的注册、发现、接入和状态管理。
 
-当前项目是一个 Spring Boot 单体服务，提供 REST API 和基于 Freemarker 的系统状态页面，不连接数据库或 Redis。
+当前模块既可以作为独立 Spring Boot 服务运行，也可以被其他 Spring Boot Web 应用直接依赖并自动装配，提供相同的 REST API 和基于 Freemarker 的系统状态页面，不连接数据库或 Redis。
 
 ## 技术栈
 
@@ -20,6 +20,8 @@ Maven 坐标：
 ```text
 com.twlic.uca:uca-base:0.0.1
 ```
+
+其他 Spring Boot Web 应用只需声明该 Maven 依赖即可启用 Base 能力，不需要扫描 `com.twlic.uca.base` 包，也不需要手工导入配置类。模块仍同时保留独立可执行 JAR。
 
 Java 根包名：
 
@@ -77,20 +79,20 @@ mvn clean package
 启动：
 
 ```powershell
-java -jar .\target\uca-base-0.0.1.jar
+java -jar .\target\uca-base-0.0.1-exec.jar
 ```
 
 默认监听：
 
 ```text
-http://localhost:48080
+http://localhost:20000
 ```
 
 可以通过环境变量覆盖端口：
 
 ```powershell
 $env:UCA_BASE_PORT='48081'
-java -jar .\target\uca-base-0.0.1.jar
+java -jar .\target\uca-base-0.0.1-exec.jar
 ```
 
 ## 系统状态页面
@@ -98,13 +100,13 @@ java -jar .\target\uca-base-0.0.1.jar
 启动后访问：
 
 ```text
-http://localhost:48080/
+http://localhost:20000/
 ```
 
 也可以使用别名路径：
 
 ```text
-http://localhost:48080/dashboard
+http://localhost:20000/dashboard
 ```
 
 页面采用 Freemarker 服务端模板和独立的 HTML、CSS、JavaScript 实现，无需 Node.js 或前端打包。主要展示：
@@ -121,7 +123,7 @@ http://localhost:48080/dashboard
 
 ```text
 子业务系统启动
-  -> PUT 注册实例
+  -> POST 注册实例，由 Base 发放实例 ID
   -> 周期性 PUT 心跳
   -> UCA-Base 保持 ONLINE
 
@@ -143,22 +145,24 @@ OFFLINE 达到保留期限
 
 ```yaml
 uca:
-  registry:
+  base:
     heartbeat-timeout: 30s
     offline-retention: 2m
     scan-interval: 5s
+    secret-interval: 10m
 ```
 
 对应环境变量：
 
 | 配置 | 环境变量 | 默认值 |
 | --- | --- | --- |
-| 服务端口 | `UCA_BASE_PORT` | `48080` |
+| 服务端口 | `UCA_BASE_PORT` | `20000` |
 | 心跳超时 | `UCA_REGISTRY_HEARTBEAT_TIMEOUT` | `30s` |
 | 离线保留 | `UCA_REGISTRY_OFFLINE_RETENTION` | `2m` |
 | 状态扫描周期 | `UCA_REGISTRY_SCAN_INTERVAL` | `5s` |
+| secret 轮换周期 | `UCA_BASE_SECRET_INTERVAL` | `10m` |
 
-三个时间配置必须大于零。
+四个时间配置必须大于零。secret 只在 Base 内存中生成，并通过注册和心跳控制面响应头同步到子服务，不会出现在服务目录、状态接口、Dashboard 或普通业务响应中。
 
 ## REST API
 
@@ -168,10 +172,10 @@ API 根路径：
 /api/v1
 ```
 
-### 注册或更新实例
+### 注册实例
 
 ```http
-PUT /api/v1/applications/{applicationCode}/instances/{instanceId}
+POST /api/v1/applications/{applicationCode}/instances
 Content-Type: application/json
 ```
 
@@ -186,7 +190,7 @@ Content-Type: application/json
 }
 ```
 
-首次注册返回 `201 Created`；相同 `applicationCode + instanceId` 再次注册会更新地址、版本和元数据，并返回 `200 OK`。
+注册返回 `201 Created`，响应中的 `instanceId` 由 UCA-Base 统一生成。客户端在当前 JVM 内保存该 ID，用于后续心跳和主动注销；Base 重启或实例记录丢失后，客户端会重新注册并获得新 ID。请求中的 `metadata` 会原样保存。
 
 ### 发送心跳
 
