@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
                 "uca.client.host=127.0.0.1:29001",
                 "uca.client.code=external-client",
                 "uca.client.name=External Client",
+                "uca.client.mode=full",
                 "uca.client.interval=1h",
                 "uca.client.connect-timeout=100ms"
         })
@@ -36,6 +37,7 @@ class UcaClientDependencyApplicationTest {
         assertThat(client).isNotNull();
         assertThat(requestEndpoint).isNotNull();
         assertThat(properties.getCode()).isEqualTo("external-client");
+        assertThat(properties.getMode()).isEqualTo(UcaClientProperties.Mode.FULL);
     }
 
     @SpringBootApplication

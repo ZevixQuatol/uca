@@ -33,6 +33,9 @@ public class UcaClientProperties {
     @Size(max = 50)
     private String version;
 
+    @NotNull
+    private Mode mode = Mode.PARTIAL;
+
     private String prefix = "";
 
     @NotNull
@@ -91,6 +94,14 @@ public class UcaClientProperties {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public Mode getMode() {
+        return mode;
+    }
+
+    public void setMode(Mode mode) {
+        this.mode = mode;
     }
 
     public URI getAdvertisedBaseUrl() {
@@ -241,5 +252,10 @@ public class UcaClientProperties {
             throw new IllegalArgumentException("prefix must be a safe relative URL path");
         }
         return normalized;
+    }
+
+    public enum Mode {
+        PARTIAL,
+        FULL
     }
 }

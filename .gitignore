@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 target/
+.smoke/
 *.iml
 *.log
 hs_err_pid*

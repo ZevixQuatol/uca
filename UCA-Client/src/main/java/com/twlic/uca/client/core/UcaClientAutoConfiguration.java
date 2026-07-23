@@ -85,8 +85,10 @@ public class UcaClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    UcaServiceCallInterceptor ucaServiceCallInterceptor(UcaServiceSignature signature) {
-        return new UcaServiceCallInterceptor(signature);
+    UcaServiceCallInterceptor ucaServiceCallInterceptor(
+            UcaServiceSignature signature,
+            UcaClientProperties properties) {
+        return new UcaServiceCallInterceptor(signature, properties);
     }
 
     @Bean
@@ -101,8 +103,10 @@ public class UcaClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    UcaResponseAdvice ucaResponseAdvice(ObjectMapper objectMapper) {
-        return new UcaResponseAdvice(objectMapper);
+    UcaResponseAdvice ucaResponseAdvice(
+            ObjectMapper objectMapper,
+            UcaClientProperties properties) {
+        return new UcaResponseAdvice(objectMapper, properties);
     }
 
     @Bean

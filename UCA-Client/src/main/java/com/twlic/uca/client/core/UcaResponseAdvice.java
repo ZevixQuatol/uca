@@ -22,9 +22,11 @@ import tools.jackson.databind.ObjectMapper;
 public class UcaResponseAdvice implements ResponseBodyAdvice<Object> {
 
     private final ObjectMapper objectMapper;
+    private final UcaClientProperties properties;
 
-    public UcaResponseAdvice(ObjectMapper objectMapper) {
+    public UcaResponseAdvice(ObjectMapper objectMapper, UcaClientProperties properties) {
         this.objectMapper = objectMapper;
+        this.properties = properties;
     }
 
     @Override
@@ -32,9 +34,7 @@ public class UcaResponseAdvice implements ResponseBodyAdvice<Object> {
             MethodParameter returnType,
             Class<? extends HttpMessageConverter<?>> converterType) {
 
-        return (returnType.getMethod() != null
-                && AnnotatedElementUtils.hasAnnotation(returnType.getMethod(), UCAResponse.class))
-                || AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), UCAResponse.class);
+        return properties.getMode() == UcaClientProperties.Mode.FULL || isAnnotated(returnType);
     }
 
     @Override
@@ -45,6 +45,11 @@ public class UcaResponseAdvice implements ResponseBodyAdvice<Object> {
             Class<? extends HttpMessageConverter<?>> selectedConverterType,
             ServerHttpRequest request,
             ServerHttpResponse response) {
+
+        if (!isAnnotated(returnType)
+                && request.getHeaders().getFirst(UcaServiceSignature.SIGNATURE) == null) {
+            return body;
+        }
 
         response.setStatusCode(HttpStatus.OK);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -76,5 +81,11 @@ public class UcaResponseAdvice implements ResponseBodyAdvice<Object> {
 
     private static String requestId(String value) {
         return value == null || value.isBlank() ? UUID.randomUUID().toString() : value;
+    }
+
+    private static boolean isAnnotated(MethodParameter returnType) {
+        return (returnType.getMethod() != null
+                && AnnotatedElementUtils.hasAnnotation(returnType.getMethod(), UCAResponse.class))
+                || AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), UCAResponse.class);
     }
 }
